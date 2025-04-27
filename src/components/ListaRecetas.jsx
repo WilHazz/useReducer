@@ -3,26 +3,18 @@ import { useForm } from "../Hooks/useForm";
 
 const listaRecetas = [
   {
-    id: 1,
+    id: new Date().getTime(),
     nombre_receta: "Pastas con pollo",
-    nivel_dificultad: "4%",
     bajaAzucar: "false",
-    ingredientes: "Pastas la muñeca, pollo desmechado, bajos en aceite",
   },
 ];
 
 const nuevaReceta = {
-  id: 2,
+  id: new Date().getTime(),
   nombre_receta: "Pita de pollo",
-  nivel_dificultad: "6%",
   bajaAzucar: "false",
-  ingredientes: "crema de leche, pollo desmechado, pasas, 0.02% de azucar",
 };
 
-// const agregarTarea = {
-//   type: "[Recetas], Agregar receta",
-//   payload: nuevaReceta,
-// };
 const ediarTarea = {
   type: "[Recetas], ediarTarea",
   payload: nuevaReceta,
@@ -36,12 +28,20 @@ const eliminarTareas = {
 
 const recetaReducer = (newReceta = listaRecetas, action = {}) => {
   switch (action.type) {
-    case "[Recetas], Agregar tarea receta":
+    case "[Recetas], Agregar receta":
       return [...newReceta, action.payload];
 
-    case "[Recetas], ediarReceta":
-      console.log("editar receta");
-      return [...newReceta, action.payload];
+    case "[Recetas], bajaAzucar":
+      return newReceta.map((receta) => {
+        if (receta.id === action.payload) {
+          return {
+            ...receta,
+            bajaAzucar: !receta.bajaAzucar,
+          };
+        }
+        return receta;
+      });
+    // return [...newReceta, action.payload];
     case "[Recetas], eliminarTarea":
       // return [...newReceta, action.payload];
       console.log("Eliminar una receta");
@@ -50,9 +50,8 @@ const recetaReducer = (newReceta = listaRecetas, action = {}) => {
       return [];
 
     default:
-      return state;
+      return newReceta;
   }
-  return newReceta;
 };
 
 export const ListaRecetas = () => {
@@ -61,20 +60,38 @@ export const ListaRecetas = () => {
   const { receta, formState, OnInputchange } = useForm({ receta: "" });
   const agregarReceta = (event) => {
     event.preventDefault();
-    //   type: "[Recetas], Agregar receta",
-    //   payload: nuevaReceta,
+    if (formState.receta == "") return;
     console.log(formState);
+    const receta = {
+      id: new Date().getTime(),
+      nombre_receta: formState.receta,
+      bajaAzucar: false,
+    };
+    const action = {
+      type: "[Recetas], Agregar receta",
+      payload: receta,
+    };
+    dispatch(action);
   };
+
+  const bajaenAzucar = ({ id }) => {
+    const action = {
+      type: "[Recetas], bajaAzucar",
+      payload: id,
+    };
+    dispatch(action);
+  };
+
   return (
     <>
       <form onSubmit={agregarReceta}>
         <div className="form-group">
-          <label htmlFor="recetas">Ingresar nueva receta: </label>
+          <label htmlFor="receta">Ingresar nueva receta: </label>
           <input
             type="text"
             className="form-control"
-            name="recetas"
-            aria-describedby="emailHelp"
+            name="receta"
+            // aria-describedby="emailHelp"
             placeholder="Ingresar recetas"
             value={receta}
             onChange={OnInputchange}
@@ -85,9 +102,22 @@ export const ListaRecetas = () => {
         </button>
       </form>
       <hr />
-      <ul>
+      <ul className="list-group">
         {Recetastate.map((item) => {
-          return <li key={item.id}>{item.nombre_receta}</li>;
+          return (
+            <li
+              key={item.id}
+              className="list-group-item d-flex justify-content-between"
+            >
+              <span>{item.nombre_receta}</span>
+              <input
+                className="form-check-input"
+                type="checkbox"
+                value={item.bajaAzucar}
+                onChange={() => bajaenAzucar(item)}
+              />
+            </li>
+          );
         })}
       </ul>
     </>
