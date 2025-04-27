@@ -15,15 +15,15 @@ const nuevaReceta = {
   bajaAzucar: "false",
 };
 
-const ediarTarea = {
+const ediarReceta = {
   type: "[Recetas], ediarTarea",
   payload: nuevaReceta,
 };
-const eliminarTarea = {
-  type: "[Recetas], eliminarTarea",
+const borrarReceta = {
+  type: "[Recetas], borrarReceta",
 };
-const eliminarTareas = {
-  type: "[Recetas], eliminarTareas",
+const borrarRecetas = {
+  type: "[Recetas], borrarRecetas",
 };
 
 const recetaReducer = (newReceta = listaRecetas, action = {}) => {
@@ -41,12 +41,10 @@ const recetaReducer = (newReceta = listaRecetas, action = {}) => {
         }
         return receta;
       });
-    // return [...newReceta, action.payload];
-    case "[Recetas], eliminarTarea":
-      // return [...newReceta, action.payload];
-      console.log("Eliminar una receta");
-    case "[Recetas], eliminarTareas":
-      console.log("Eliminar todas receta");
+
+    case "[Recetas], borrarReceta":
+      return newReceta.filter((receta) => receta.id !== action.payload);
+    case "[Recetas], borrarRecetas":
       return [];
 
     default:
@@ -82,6 +80,22 @@ export const ListaRecetas = () => {
     dispatch(action);
   };
 
+  const borrarReceta = ({ id }) => {
+    const action = {
+      type: "[Recetas], borrarReceta",
+      payload: id,
+    };
+    dispatch(action);
+  };
+
+  const reset = () => {
+    const action = {
+      type: "[Recetas], borrarRecetas",
+      payload: "",
+    };
+    dispatch(action);
+  };
+
   return (
     <>
       <form onSubmit={agregarReceta}>
@@ -98,7 +112,10 @@ export const ListaRecetas = () => {
           />
         </div>
         <button type="submit" className="btn btn-warning">
-          Ingresar Receta
+          📑 Ingresar Receta
+        </button>
+        <button type="button" className="btn btn-primary" onClick={reset}>
+          🔄 Reset
         </button>
       </form>
       <hr />
@@ -110,12 +127,20 @@ export const ListaRecetas = () => {
               className="list-group-item d-flex justify-content-between"
             >
               <span>{item.nombre_receta}</span>
-              <input
-                className="form-check-input"
-                type="checkbox"
-                value={item.bajaAzucar}
-                onChange={() => bajaenAzucar(item)}
-              />
+              <div>
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  value={item.bajaAzucar}
+                  onChange={() => bajaenAzucar(item)}
+                />
+                <button
+                  className="btn btn-danger"
+                  onClick={() => borrarReceta(item)}
+                >
+                  🗑
+                </button>
+              </div>
             </li>
           );
         })}
